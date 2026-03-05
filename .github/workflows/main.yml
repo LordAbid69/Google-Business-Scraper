@@ -1,0 +1,38 @@
+name: Build Mac DMG
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # allows you to trigger it manually from GitHub
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+
+      - name: Build Mac DMG
+        run: npx electron-builder --mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GMaps-Scraper-Mac
+          path: |
+            dist/*.dmg
+          retention-days: 30
